@@ -33,6 +33,10 @@ function trainerCard(trainer_id, selector) {
   return card.querySelector(selector)
 }
 
+function pokemonItem(pokemon_id) {
+  return document.querySelector(`.poke[data-id="${pokemon_id}"]`)
+}
+
 /* dom */
 
 function renderTrainers(trainers) {
@@ -52,6 +56,7 @@ function renderTrainer(trainer, parent) {
   const btn = document.createElement('button')
   btn.classList.add('add-btn')
   btn.innerText = "Add Pokemon"
+
   btn.addEventListener('click', e => handleAdd(trainer, e))
   card.appendChild(btn)
 
@@ -65,6 +70,7 @@ function renderTrainer(trainer, parent) {
 
 function renderPokemon(poke, parent = undefined) {
   const li = document.createElement('li')
+  li.classList.add('poke')
   li.dataset.id = poke.id
   li.dataset.trainerId = poke.trainer_id
 
@@ -73,6 +79,8 @@ function renderPokemon(poke, parent = undefined) {
   const btn = document.createElement('button')
   btn.classList.add('release-btn', 'release')
   btn.innerText = "Release"
+
+  btn.addEventListener('click', e => handleRelease(poke, e))
   li.appendChild(btn)
 
   // if no parent if supplied, try to find based on trainer
@@ -82,8 +90,16 @@ function renderPokemon(poke, parent = undefined) {
   parent.appendChild(li)
 }
 
+function removePokemon(poke) {
+  pokemonItem(poke.id).remove()
+}
+
 /* event listeners */
 
 function handleAdd(trainer, event) {
   trainerAPI.newPokemon(trainer).then(renderPokemon)
+}
+
+function handleRelease(poke, event) {
+  pokeAPI.release(poke).then(removePokemon(poke))
 }

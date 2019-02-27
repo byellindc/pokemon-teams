@@ -31,11 +31,9 @@ class Adapter {
 
   delete(endpoint, obj) {
     const url = `${endpoint}/${obj.id}`
-    return request(url, {method: "DELETE"})
+    return this.request(url, {method: "DELETE"})
   }
 }
-
-// Adapter.base = 'http://localhost:3000'
 
 class TrainerAPI extends Adapter {
   constructor() {
@@ -81,7 +79,7 @@ class PokemonAPI extends Adapter {
     return this.post(this.endpoint, {trainer_id: trainer.id})
   }
 
-  delete(pokemon) {
+  release(pokemon) {
     return this.delete(this.endpoint, pokemon)
   }
 }
