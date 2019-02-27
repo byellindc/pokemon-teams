@@ -1,5 +1,6 @@
 const trainerAPI = new TrainerAPI()
 const pokeAPI = new PokemonAPI()
+let trainers = []
 
 document.addEventListener('DOMContentLoaded', () => {
   loadTrainers()
@@ -8,7 +9,28 @@ document.addEventListener('DOMContentLoaded', () => {
 /* api/data */
 
 function loadTrainers() {
-  trainerAPI.all().then(renderTrainers)
+  trainerAPI.all().then(trainerResp => {
+    trainers = trainerResp
+    renderTrainers(trainers)
+  })
+}
+
+function addPokemon(trainer) {
+  const pokeList = trainerCard(trainer.id, '.poke-list')
+  if (!pokeList) throw 'No Trainer Pokemon List Found'
+
+  trainerAPI.newPokemon(trainer)
+    .then(poke => renderPokemon(poke, pokeList))
+}
+
+/* helpers */
+
+function trainerCard(trainer_id, selector) {
+  const card = document.querySelector(`.card[data-id="${trainer_id}"]`)
+  if (!card) throw 'No Trainer Card Found'
+  
+  if (typeof selector === 'undefined') return card
+  return card.querySelector(selector)
 }
 
 /* dom */
@@ -30,16 +52,18 @@ function renderTrainer(trainer, parent) {
   const btn = document.createElement('button')
   btn.classList.add('add-btn')
   btn.innerText = "Add Pokemon"
+  btn.addEventListener('click', e => handleAdd(trainer, e))
   card.appendChild(btn)
 
   const list = document.createElement('ul')
+  list.classList.add('poke-list')
   trainer.pokemons.forEach(p => renderPokemon(p, list))
   card.appendChild(list)
 
   parent.appendChild(card)
 }
 
-function renderPokemon(poke, parent) {
+function renderPokemon(poke, parent = undefined) {
   const li = document.createElement('li')
   li.dataset.id = poke.id
   li.dataset.trainerId = poke.trainer_id
@@ -47,9 +71,19 @@ function renderPokemon(poke, parent) {
   li.innerText = `${poke.nickname} (${poke.species}) `
   
   const btn = document.createElement('button')
-  btn.classList.add('add-btn')
+  btn.classList.add('release-btn', 'release')
   btn.innerText = "Release"
   li.appendChild(btn)
 
+  // if no parent if supplied, try to find based on trainer
+  if (!parent) parent = trainerCard(poke.trainer_id, '.poke-list')
+
+  if (!parent) throw 'No Pokemon List Found'
   parent.appendChild(li)
+}
+
+/* event listeners */
+
+function handleAdd(trainer, event) {
+  trainerAPI.newPokemon(trainer).then(renderPokemon)
 }
