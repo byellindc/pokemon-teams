@@ -1,1 +1,9 @@
-//solution goes here
+document.addEventListener('DOMContentLoaded', () => {
+  
+})
+
+/* helpers */
+
+/* api */
+
+/* dom */
