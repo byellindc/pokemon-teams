@@ -3,14 +3,14 @@ class Adapter {
     this.base = 'http://localhost:3000'
   }
 
-  request(endpoint, opts) {
+  async request(endpoint, opts) {
     const url = `${this.base}/${endpoint}`
-    return fetch(url, opts)
-      .then(res => res.json())
+    const res = await fetch(url, opts)
+    return res.json()
   }
 
   send(endpoint, obj, method = "POST") {
-    const url = (id in obj) ? `${endpoint}/${obj.id}` : endpoint
+    const url = ('id' in obj) ? `${endpoint}/${obj.id}` : endpoint
 
     const opts = {
       method: method,
@@ -47,6 +47,11 @@ class TrainerAPI extends Adapter {
     return this.request(this.endpoint)
   }
 
+  newPokemon(trainer) {
+    const pokeAPI = new PokemonAPI()
+    return pokeAPI.createForTrainer(trainer)
+  }
+
   /* version 2.0 */
 
   // find(id) {
@@ -70,6 +75,10 @@ class PokemonAPI extends Adapter {
 
   create(pokemon) {
     return this.post(this.endpoint, pokemon)
+  }
+
+  createForTrainer(trainer) {
+    return this.post(this.endpoint, {trainer_id: trainer.id})
   }
 
   delete(pokemon) {
