@@ -1,11 +1,15 @@
 class Adapter {
-  static request(endpoint, opts) {
-    const url = `${Adapter.base}/${endpoint}`
+  constructor() {
+    this.base = 'http://localhost:3000'
+  }
+
+  request(endpoint, opts) {
+    const url = `${this.base}/${endpoint}`
     return fetch(url, opts)
       .then(res => res.json())
   }
 
-  static send(endpoint, obj, method = "POST") {
+  send(endpoint, obj, method = "POST") {
     const url = (id in obj) ? `${endpoint}/${obj.id}` : endpoint
 
     const opts = {
@@ -14,65 +18,62 @@ class Adapter {
       body: JSON.stringify(obj)
     }
 
-    return request(url, opts)
+    return this.request(url, opts)
   }
 
-  static post(endpoint, obj) {
-    return Adapter.send(endpoint, obj, "POST")
+  post(endpoint, obj) {
+    return this.send(endpoint, obj, "POST")
   }
 
-  static patch(endpoint, obj) {
-    return Adapter.send(endpoint, obj, "PATCH")
+  patch(endpoint, obj) {
+    return this.send(endpoint, obj, "PATCH")
   }
 
-  static delete(endpoint, obj) {
+  delete(endpoint, obj) {
     const url = `${endpoint}/${obj.id}`
     return request(url, {method: "DELETE"})
   }
+}
 
-  /* trainers */
+// Adapter.base = 'http://localhost:3000'
 
-  static getTrainers() {
-    return Adapter.request('trainers')
+class TrainerAPI extends Adapter {
+  constructor() {
+    super()
+    this.endpoint = 'trainers'
   }
 
-  static getTrainer(id) {
-    return Adapter.request(`trainers/${id}`)
+  all() {
+    return this.request(this.endpoint)
   }
 
-  static createTrainer(trainer) {
-    return Adapter.post('trainers', trainer)
+  /* version 2.0 */
+
+  // find(id) {
+  //   return this.request(`${this.endpoint}/${id}`)
+  // }
+
+  // update(trainer) {
+  //   return this.patch(this.endpoint, trainer)
+  // }
+
+  // delete(trainer) {
+  //   return this.delete(this.endpoint, trainer)
+  // }
+}
+
+class PokemonAPI extends Adapter {
+  constructor() {
+    super()
+    this.endpoint = 'pokemons'
   }
 
-  static updateTrainer(trainer) {
-    return Adapter.patch('trainers', trainer)
+  create(pokemon) {
+    return this.post(this.endpoint, pokemon)
   }
 
-  static deleteTrainer(trainer) {
-    return Adapter.delete('trainers', trainer)
-  }
-
-  /* pokemon */
-
-  static getPokemons() {
-    return Adapter.request('pokemons')
-  }
-
-  static getPokemon(id) {
-    return Adapter.request(`pokemons/${id}`)
-  }
-
-  static createPokemon(poke) {
-    return Adapter.post('pokemons', poke)
-  }
-
-  static updatePokemon(poke) {
-    return Adapter.patch('pokemons', poke)
-  }
-
-  static deletePokemon(poke) {
-    return Adapter.delete('pokemons', poke)
+  delete(pokemon) {
+    return this.delete(this.endpoint, pokemon)
   }
 }
 
-Adapter.base = 'http://localhost:3000'
